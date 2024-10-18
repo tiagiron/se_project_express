@@ -11,7 +11,7 @@ const getUsers = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res
+        res
           .status(NOT_FOUND_STATUS_CODE)
           .send({ message: "Requested resource not found" });
       }
@@ -28,9 +28,7 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
+        res.status(BAD_REQUEST_STATUS_CODE).send({ message: err.message });
       }
       return res
         .status(SERVER_ERROR_STATUS_CODE)
@@ -46,13 +44,11 @@ const getUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res
+        res
           .status(NOT_FOUND_STATUS_CODE)
           .send({ message: "Requested resource not found" });
       } else if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
+        res.status(BAD_REQUEST_STATUS_CODE).send({ message: err.message });
       }
       return res
         .status(SERVER_ERROR_STATUS_CODE)

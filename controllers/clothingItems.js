@@ -11,7 +11,7 @@ const getItems = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res
+        res
           .status(NOT_FOUND_STATUS_CODE)
           .send({ message: "Requested resource not found" });
       }
@@ -31,9 +31,7 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
+        res.status(BAD_REQUEST_STATUS_CODE).send({ message: err.message });
       }
       return res
         .status(SERVER_ERROR_STATUS_CODE)
@@ -52,11 +50,9 @@ const updateItem = (req, res) => {
       .catch((err) => {
         console.error(err);
         if (err.name === "ValidationError") {
-          return res
-            .status(BAD_REQUEST_STATUS_CODE)
-            .send({ message: err.message });
+          res.status(BAD_REQUEST_STATUS_CODE).send({ message: err.message });
         } else if (err.name === "DocumentNotFoundError") {
-          return res
+          res
             .status(NOT_FOUND_STATUS_CODE)
             .send({ message: "Requested resource not found" });
         }
@@ -76,11 +72,9 @@ const deleteItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
+        res.status(BAD_REQUEST_STATUS_CODE).send({ message: err.message });
       } else if (err.name === "DocumentNotFoundError") {
-        return res
+        res
           .status(NOT_FOUND_STATUS_CODE)
           .send({ message: "Requested resource not found" });
       }
@@ -101,11 +95,9 @@ const likeItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
+        res.status(BAD_REQUEST_STATUS_CODE).send({ message: err.message });
       } else if (err.name === "DocumentNotFoundError") {
-        return res
+        res
           .status(NOT_FOUND_STATUS_CODE)
           .send({ message: "Requested resource not found" });
       }
@@ -126,11 +118,9 @@ const dislikeItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: err.message });
+        res.status(BAD_REQUEST_STATUS_CODE).send({ message: err.message });
       } else if (err.name === "DocumentNotFoundError") {
-        return res
+        res
           .status(NOT_FOUND_STATUS_CODE)
           .send({ message: "Requested resource not found" });
       }
