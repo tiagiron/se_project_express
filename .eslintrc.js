@@ -20,7 +20,12 @@ module.exports = {
     sourceType: "module",
   },
   rules: {
-    "no-underscore-dangle": "off",
-    /* maybe - ["off", { allow: ["foo_", "_bar"] }], */
+    "no-console": ["warn", { allow: ["error"] }],
+    "no-underscore-dangle": [
+      "error",
+      {
+        allow: ["_id"],
+      },
+    ],
   },
 };
