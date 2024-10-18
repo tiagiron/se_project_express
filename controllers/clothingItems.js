@@ -74,10 +74,10 @@ const deleteItem = (req, res) => {
   console.log(itemId);
   ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((item) => res.status(204).send({}))
+    .then((item) => res.status(200).send(item))
     .catch((err) => {
       console.error(err);
-      if (err.name === "ValidationError") {
+      if (err.name === "ValidationError" || err.name === "CastError") {
         //find error name
         return res
           .status(BAD_REQUEST_STATUS_CODE)
@@ -99,25 +99,24 @@ const likeItem = (req, res) => {
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
-      .orFail()
-      .then((item) => res.status(200).send({ data: item }))
-      .catch((err) => {
-        console.error(err);
-        if (err.name === "ValidationError") {
-          //find error name
-          return res
-            .status(BAD_REQUEST_STATUS_CODE)
-            .send({ message: err.message });
-        } else if (err.name === "DocumentNotFoundError") {
-          return res
-            .status(NOT_FOUND_STATUS_CODE)
-            .send({ message: "Requested resource not found" });
-        }
+  )
+    .orFail()
+    .then((item) => res.status(200).send(item))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError" || err.name === "CastError") {
         return res
-          .status(SERVER_ERROR_STATUS_CODE)
+          .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: err.message });
-      })
-  );
+      } else if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "Requested resource not found" });
+      }
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
+    });
 };
 
 const dislikeItem = (req, res) => {
@@ -125,25 +124,24 @@ const dislikeItem = (req, res) => {
     req.params.itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
-      .orFail()
-      .then((item) => res.status(200).send({ data: item }))
-      .catch((err) => {
-        console.error(err);
-        if (err.name === "ValidationError") {
-          //find error name
-          return res
-            .status(BAD_REQUEST_STATUS_CODE)
-            .send({ message: err.message });
-        } else if (err.name === "DocumentNotFoundError") {
-          return res
-            .status(NOT_FOUND_STATUS_CODE)
-            .send({ message: "Requested resource not found" });
-        }
+  )
+    .orFail()
+    .then((item) => res.status(200).send(item))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError" || err.name === "CastError") {
         return res
-          .status(SERVER_ERROR_STATUS_CODE)
+          .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: err.message });
-      })
-  );
+      } else if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "Requested resource not found" });
+      }
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
+    });
 };
 
 module.exports = {
