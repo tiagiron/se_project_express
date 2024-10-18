@@ -31,7 +31,6 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        //find error name
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: err.message });
@@ -53,7 +52,6 @@ const updateItem = (req, res) => {
       .catch((err) => {
         console.error(err);
         if (err.name === "ValidationError") {
-          //find error name
           return res
             .status(BAD_REQUEST_STATUS_CODE)
             .send({ message: err.message });
@@ -78,7 +76,6 @@ const deleteItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        //find error name
         return res
           .status(BAD_REQUEST_STATUS_CODE)
           .send({ message: err.message });
@@ -93,7 +90,6 @@ const deleteItem = (req, res) => {
     });
 };
 
-//LIKES
 const likeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
