@@ -3,6 +3,7 @@ const {
   BAD_REQUEST_STATUS_CODE,
   NOT_FOUND_STATUS_CODE,
   SERVER_ERROR_STATUS_CODE,
+  FORBIDDEN,
 } = require("../utils/errors");
 
 const getItems = (req, res) => {
@@ -39,9 +40,35 @@ const createItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
   console.log(itemId);
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
-    .then((item) => res.send(item))
+    .then((item) => {
+      if (!item.owner.equals(req.user._id)) {
+        return res
+          .status(FORBIDDEN)
+          .send({ message: "You can't delete this item" });
+      }
+      return ClothingItem.findByIdAndDelete(itemId)
+        .orFail()
+        .then(() => res.send({ message: "Item deleted" }))
+        .catch((err) => {
+          console.error(err);
+          if (err.name === "ValidationError" || err.name === "CastError") {
+            return res
+              .status(BAD_REQUEST_STATUS_CODE)
+              .send({ message: "Invalid data" });
+          }
+          if (err.name === "DocumentNotFoundError") {
+            return res
+              .status(NOT_FOUND_STATUS_CODE)
+              .send({ message: "Requested resource not found" });
+          }
+          return res
+            .status(SERVER_ERROR_STATUS_CODE)
+            .send({ message: "An error has occurred on the server" });
+        });
+    })
+
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
