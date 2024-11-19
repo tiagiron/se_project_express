@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const {
   BAD_REQUEST_STATUS_CODE,
@@ -7,7 +8,6 @@ const {
   CONFLICT_STATUS_CODE,
   UNAUTHORIZED_STATUS,
 } = require("../utils/errors");
-const bcrypt = require("bcryptjs");
 const { JWT_SECRET } = require("../utils/config");
 
 const login = (req, res) => {
