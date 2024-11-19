@@ -7,7 +7,7 @@ const {
   CONFLICT_STATUS_CODE,
   UNAUTHORIZED_STATUS,
 } = require("../utils/errors");
-const bcrypt = require("bycryptjs");
+const bcrypt = require("bcryptjs");
 const { JWT_SECRET } = require("../utils/config");
 
 const login = (req, res) => {
@@ -18,6 +18,7 @@ const login = (req, res) => {
       .status(BAD_REQUEST_STATUS_CODE)
       .send({ message: "Email and password are required" });
   }
+
   return User.findUserByCredentials({ email, password })
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -38,17 +39,6 @@ const login = (req, res) => {
     });
 };
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server" });
-    });
-};
-
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
   if (!email || !password) {
@@ -56,40 +46,40 @@ const createUser = (req, res) => {
       .status(BAD_REQUEST_STATUS_CODE)
       .send({ message: "Email and password are required" });
   }
-  return User.findOne({ email }).then((existingUser) => {
-    if (existingUser) {
-      return res
-        .status(conflict)
-        .send({ message: "This email already exists" });
-    }
-    return bcrypt
-      .hash(password, 10)
-      .then((hash) =>
-        User.create({
-          name,
-          avatar,
-          email,
-          password: hash,
-        })
-      )
-      .then((user) => res.status(201).send(user))
-      .catch((err) => {
-        console.error(err);
-        if (err.name === "ValidationError") {
-          return res
-            .status(BAD_REQUEST_STATUS_CODE)
-            .send({ message: "Invalid data" });
-        }
-        if (err.code === 11000) {
-          return res
-            .status(CONFLICT_STATUS_CODE)
-            .send({ message: "This email already exists" });
-        }
+  return User.findOne({ email })
+    .then((existingUser) => {
+      if (existingUser) {
         return res
-          .status(SERVER_ERROR_STATUS_CODE)
-          .send({ message: "An error has occurred on the server" });
-      });
-  });
+          .status(CONFLICT_STATUS_CODE)
+          .send({ message: "This email already exists" });
+      }
+      return bcrypt
+        .hash(password, 10)
+        .then((hash) =>
+          User.create({
+            name,
+            avatar,
+            email,
+            password: hash,
+          })
+        )
+        .then((user) => {
+          res
+            .status(201)
+            .send({ name: user.name, avatar: user.avatar, email: user.email });
+        });
+    })
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res
+          .status(BAD_REQUEST_STATUS_CODE)
+          .send({ message: "Invalid data" });
+      }
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: "An error has occurred on the server" });
+    });
 };
 
 const getCurrentUser = (req, res) => {
@@ -143,4 +133,4 @@ const updateUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getCurrentUser, login, updateUser };
+module.exports = { createUser, getCurrentUser, login, updateUser };

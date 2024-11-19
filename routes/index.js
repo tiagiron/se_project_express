@@ -4,7 +4,7 @@ const { NOT_FOUND_STATUS_CODE } = require("../utils/errors");
 const userRouter = require("./users");
 const itemRouter = require("./clothingItems");
 
-const { createUser, login } = require("./controllers/users");
+const { createUser, login } = require("../controllers/users");
 const auth = require("../middleware/auth");
 
 router.post("/signin", login);
