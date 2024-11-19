@@ -43,7 +43,7 @@ const deleteItem = (req, res) => {
   ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
-      if (!item.owner.equals(req.user._id)) {
+      if (String(item.owner) !== req.user._id) {
         return res
           .status(FORBIDDEN)
           .send({ message: "You can't delete this item" });
@@ -68,7 +68,6 @@ const deleteItem = (req, res) => {
             .send({ message: "An error has occurred on the server" });
         });
     })
-
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {

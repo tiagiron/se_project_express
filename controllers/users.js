@@ -19,7 +19,7 @@ const login = (req, res) => {
       .send({ message: "Email and password are required" });
   }
 
-  return User.findUserByCredentials({ email, password })
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -83,10 +83,17 @@ const createUser = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  const { userId } = req.params;
-  User.findById(userId)
+  User.findById(req.user._id)
     .orFail()
-    .then((user) => res.send(user))
+    .then((user) => {
+      const { _id, email, avatar, name } = user;
+      res.status(200).send({
+        _id,
+        email,
+        avatar,
+        name,
+      });
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
@@ -107,14 +114,13 @@ const getCurrentUser = (req, res) => {
 
 const updateUser = (req, res) => {
   const { name, avatar } = req.body;
-  const { userId } = req.params;
   User.findByIdAndUpdate(
-    userId,
+    req.user._id,
     { name, avatar },
     { new: true, runValidators: true }
   )
     .orFail()
-    .then((user) => res.send(user))
+    .then(() => res.send({ name, avatar }))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
