@@ -87,7 +87,7 @@ const getCurrentUser = (req, res) => {
     .orFail()
     .then((user) => {
       const { _id, email, avatar, name } = user;
-      res.status(200).send({
+      res.send({
         _id,
         email,
         avatar,

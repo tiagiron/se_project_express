@@ -145,7 +145,7 @@ const dislikeItem = (req, res) => {
 //   ClothingItem.findByIdAndUpdate(itemId, {
 //     $set: { imageUrl }
 //       .orFail()
-//       .then((item) => res.status(200).send({ data: item }))
+//       .then((item) => res.send({ data: item }))
 //       .catch((err) => {
 //         console.error(err);
 //         if (err.name === "ValidationError") {
