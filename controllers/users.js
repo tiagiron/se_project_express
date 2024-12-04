@@ -40,11 +40,11 @@ const login = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar, email, password } = req.body;
-  if (!email || !password) {
+  const { email, password, name, avatar } = req.body;
+  if (!email || !password || !name || !avatar) {
     return res
       .status(BAD_REQUEST_STATUS_CODE)
-      .send({ message: "Email and password are required" });
+      .send({ message: "All data required" });
   }
   return User.findOne({ email })
     .then((existingUser) => {
@@ -57,16 +57,16 @@ const createUser = (req, res) => {
         .hash(password, 10)
         .then((hash) =>
           User.create({
-            name,
-            avatar,
             email,
             password: hash,
+            name,
+            avatar,
           })
         )
         .then((user) => {
           res
             .status(201)
-            .send({ name: user.name, avatar: user.avatar, email: user.email });
+            .send({ email: user.email, name: user.name, avatar: user.avatar });
         });
     })
     .catch((err) => {
@@ -86,12 +86,12 @@ const getCurrentUser = (req, res) => {
   User.findById(req.user._id)
     .orFail()
     .then((user) => {
-      const { _id, email, avatar, name } = user;
+      const { _id, email, name, avatar } = user;
       res.send({
         _id,
         email,
-        avatar,
         name,
+        avatar,
       });
     })
     .catch((err) => {
