@@ -1,22 +1,24 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
-const {
-  BAD_REQUEST_STATUS_CODE,
-  NOT_FOUND_STATUS_CODE,
-  SERVER_ERROR_STATUS_CODE,
-  CONFLICT_STATUS_CODE,
-  UNAUTHORIZED_STATUS,
-} = require("../utils/errors");
+// const {
+//   BAD_REQUEST_STATUS_CODE,
+//   NOT_FOUND_STATUS_CODE,
+//   SERVER_ERROR_STATUS_CODE,
+//   CONFLICT_STATUS_CODE,
+//   UNAUTHORIZED_STATUS,
+// } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
+const { BadRequestError } = require("../errors/BadRequestError");
+const { ConflictError } = require("../errors/ConflictError");
+const { UnauthorizedError } = require("../errors/UnauthorizedError");
+const { NotFoundError } = require("../errors/NotFoundError");
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST_STATUS_CODE)
-      .send({ message: "Email and password are required" });
+    throw new BadRequestError("Email and password are required");
   }
 
   return User.findUserByCredentials(email, password)
@@ -28,30 +30,25 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      if (err.message === "Incorrect email or password") {
-        return res
-          .status(UNAUTHORIZED_STATUS)
-          .send({ message: "Incorrect email or password" });
+      if (err.name === "UnauthorizedError") {
+        next(new UnauthorizedError("Incorrect email or password"));
+      } else if (err.name === "ValidationError") {
+        next(new BadRequestError("Invalid data"));
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error occurred with the server" });
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { email, password, name, avatar } = req.body;
   if (!email || !password || !name || !avatar) {
-    return res
-      .status(BAD_REQUEST_STATUS_CODE)
-      .send({ message: "All data required" });
+    throw new BadRequestError("All data required");
   }
   return User.findOne({ email })
     .then((existingUser) => {
       if (existingUser) {
-        return res
-          .status(CONFLICT_STATUS_CODE)
-          .send({ message: "This email already exists" });
+        throw new ConflictError("This email already exists");
       }
       return bcrypt
         .hash(password, 10)
@@ -72,13 +69,10 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        next(new BadRequestError("Invalid data"));
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -97,18 +91,13 @@ const getCurrentUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Requested resource not found" });
+        next(new NotFoundError("Requested resource not found"));
       }
       if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        next(new BadRequestError("Invalid data"));
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -124,18 +113,13 @@ const updateUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Requested resource not found" });
+        next(new NotFoundError("Requested resource not found"));
       }
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Validation failed" });
+        next(new BadRequestError("Invalid data"));
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server" });
     });
 };
 

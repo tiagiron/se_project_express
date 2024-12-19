@@ -1,19 +1,20 @@
 const ClothingItem = require("../models/clothingItem");
-const {
-  BAD_REQUEST_STATUS_CODE,
-  NOT_FOUND_STATUS_CODE,
-  SERVER_ERROR_STATUS_CODE,
-  FORBIDDEN,
-} = require("../utils/errors");
+// const {
+//   BAD_REQUEST_STATUS_CODE,
+//   NOT_FOUND_STATUS_CODE,
+//   SERVER_ERROR_STATUS_CODE,
+//   FORBIDDEN,
+// } = require("../utils/errors");
+const { BadRequestError } = require("../errors/BadRequestError");
+const { NotFoundError } = require("../errors/NotFoundError");
+const { ForbiddenError } = require("../errors/ForbiddenError");
 
 const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.send(items))
     .catch((err) => {
       console.error(err);
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server" });
+      next(err);
     });
 };
 
@@ -27,13 +28,10 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        next(new BadRequestError("Invalid data"));
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -44,9 +42,7 @@ const deleteItem = (req, res) => {
     .orFail()
     .then((item) => {
       if (String(item.owner) !== req.user._id) {
-        return res
-          .status(FORBIDDEN)
-          .send({ message: "You can't delete this item" });
+        next(new ForbiddenError("You can't delete this item"));
       }
       return ClothingItem.findByIdAndDelete(itemId)
         .orFail()
@@ -54,35 +50,25 @@ const deleteItem = (req, res) => {
         .catch((err) => {
           console.error(err);
           if (err.name === "ValidationError" || err.name === "CastError") {
-            return res
-              .status(BAD_REQUEST_STATUS_CODE)
-              .send({ message: "Invalid data" });
+            next(new BadRequestError("Invalid data"));
           }
           if (err.name === "DocumentNotFoundError") {
-            return res
-              .status(NOT_FOUND_STATUS_CODE)
-              .send({ message: "Requested resource not found" });
+            next(new NotFoundError("Requested resource not found"));
+          } else {
+            next(err);
           }
-          return res
-            .status(SERVER_ERROR_STATUS_CODE)
-            .send({ message: "An error has occurred on the server" });
         });
     })
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        next(new BadRequestError("Invalid data"));
       }
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Requested resource not found" });
+        next(new NotFoundError("Requested resource not found"));
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -97,18 +83,13 @@ const likeItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        next(new BadRequestError("Invalid data"));
       }
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Requested resource not found" });
+        next(new NotFoundError("Requested resource not found"));
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -123,18 +104,13 @@ const dislikeItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        next(new BadRequestError("Invalid data"));
       }
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Requested resource not found" });
+        next(new NotFoundError("Requested resource not found"));
+      } else {
+        next(err);
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -149,18 +125,14 @@ const dislikeItem = (req, res) => {
 //       .catch((err) => {
 //         console.error(err);
 //         if (err.name === "ValidationError") {
-//           return res
-//             .status(BAD_REQUEST_STATUS_CODE)
-//             .send({ message: err.message });
+//           next(new BadRequestError("Invalid data"));
 //         }
 //         if (err.name === "DocumentNotFoundError") {
-//           return res
-//             .status(NOT_FOUND_STATUS_CODE)
-//             .send({ message: "Requested resource not found" });
+//           next(new NotFoundError("Requested resource not found"));
 //         }
-//         return res
-//           .status(SERVER_ERROR_STATUS_CODE)
-//           .send({ message: err.message });
+//         else {
+//        next(err);
+//      }
 //       }),
 //   });
 // };
