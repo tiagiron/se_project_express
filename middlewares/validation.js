@@ -8,30 +8,6 @@ const validateURL = (value, helpers) => {
   return helpers.error("string.uri");
 };
 
-router.post(
-  "/items",
-  celebrate({
-    body: Joi.object().keys({
-      name: Joi.string().required().min(2).max(30),
-      imageUrl: Joi.url().required(),
-    }),
-  }),
-  createPost
-);
-
-router.post(
-  "/users",
-  celebrate({
-    body: Joi.object().keys({
-      name: Joi.string().required().min(2).max(30),
-      avatar: Joi.url().required(),
-      email: Joi.email().required(),
-      password: Joi.string().required(),
-    }),
-  }),
-  createPost
-);
-
 module.exports.validateClothingBody = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30).messages({
