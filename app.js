@@ -3,6 +3,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const { errors } = require("celebrate");
+const helmet = require("helmet");
+const { limiter } = require("./utils/limiter");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middlewares/error-handler");
 
@@ -19,6 +21,7 @@ mongoose
   })
   .catch(console.error);
 
+app.use(limiter);
 app.use(express.json());
 app.use(cors());
 
@@ -34,6 +37,7 @@ app.use("/", mainRouter);
 
 app.use(errorLogger);
 app.use(errors());
+app.use(helmet());
 app.use(errorHandler);
 
 app.listen(PORT, () => {
