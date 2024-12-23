@@ -16,7 +16,7 @@ router.post("/signup", validateUserBody, createUser);
 router.use("/users", auth, userRouter);
 router.use("/items", itemRouter);
 
-router.use((req, res) => {
+router.use(() => {
   throw new NotFoundError("Router not found");
 });
 
